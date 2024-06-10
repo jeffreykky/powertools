@@ -1,3 +1,5 @@
+import sys
+sys.path.append(f"/home/glue_user/workspace")
 from src.powertools.glue_spark.lps_glue import LPSGlue
 
 from pyspark.sql import functions as f
