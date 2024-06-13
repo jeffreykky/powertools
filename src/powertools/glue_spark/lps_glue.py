@@ -4,7 +4,6 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 
 from pyspark.sql import SparkSession
-## @params: [JOB_NAME]
 
 from .log import GlueLogger
 from .read import GlueSparkReader
@@ -12,6 +11,9 @@ from .write import GlueSparkWriter
 from .transform import GlueSparkTransformer
 from .aws import AWS
 
+
+class JobArguments(object):
+    pass
 
 class LPSGlue:
     def __init__(self, spark_shell:bool = True):
@@ -22,12 +24,16 @@ class LPSGlue:
 
         if spark_shell:
             args = [arg[2:] for arg in sys.argv if (arg.startswith('--') and arg not in Job.job_bookmark_range_options())]
-            self.args = getResolvedOptions(sys.argv, args)
+            args = getResolvedOptions(sys.argv, args)
+            _args = JobArguments()
+            for key, value in args.items():
+                setattr(_args, key, value)
+            self.args: JobArguments = _args
             self.sc = SparkSession.builder.getOrCreate()
             self.glueContext = GlueContext(self.sc)
             self.spark = self.glueContext.spark_session
             self.job = Job(self.glueContext)
-            self.job.init(self.args['JOB_NAME'], self.args)
+            self.job.init(self.args.JOB_NAME, args)
             
             self.fix_glue_legacy_timestamp()
             self.read = GlueSparkReader(self.spark)
